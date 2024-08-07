@@ -1,0 +1,38 @@
+
+# Import necessary libraries
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.model_selection import train_test_split
+
+# Sample dataset
+data = [
+    ("This is a great product", 1),
+    ("I love this product", 1),
+    ("This product is terrible", 0),
+    ("I hate this product", 0),
+    ("This product is okay", 1),
+    ("I'm neutral about this product", 1),
+]
+
+# Split data into features (X) and target (y)
+X = [x[0] for x in data]
+y = [x[1] for x in data]
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
+
+# Create a bag-of-words representation using CountVectorizer
+vectorizer = CountVectorizer()
+X_train_count = vectorizer.fit_transform(X_train)
+X_test_count = vectorizer.transform(X_test)
+
+# Train the Naive Bayesian Classifier
+clf = MultinomialNB()
+clf.fit(X_train_count, y_train)
+
+# Make predictions on the test set
+predictions = clf.predict(X_test_count)
+
+# Print the predictions
+for i in range(len(predictions)):
+    print(f"Prediction for '{X_test[i]}': {predictions[i]}")
