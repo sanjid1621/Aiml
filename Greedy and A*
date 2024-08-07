@@ -1,0 +1,41 @@
+import heapq
+
+def reconstruct_path(came_from, current):
+    path = []
+    while current:
+        path.append(current)
+        current = came_from.get(current)
+    return path[::-1]
+
+def search(graph, start, goal, heuristics, a_star=False):
+    open_list, came_from, g_costs = [(heuristics[start], start)], {}, {start: 0}
+    while open_list:
+        _, current = heapq.heappop(open_list)
+        if current == goal:
+            return reconstruct_path(came_from, current)
+        for neighbor, cost in graph[current].items():
+            new_cost = g_costs[current] + cost
+            if new_cost < g_costs.get(neighbor, float('inf')):
+                came_from[neighbor] = current
+                g_costs[neighbor] = new_cost
+                priority = new_cost + heuristics[neighbor] if a_star else heuristics[neighbor]
+                heapq.heappush(open_list, (priority, neighbor))
+    return None
+
+# Example graph and heuristics
+graph = {
+    'A': {'B': 1, 'C': 4},
+    'B': {'A': 1, 'D': 2, 'E': 5},
+    'C': {'A': 4, 'F': 3},
+    'D': {'B': 2},
+    'E': {'B': 5, 'F': 2},
+    'F': {'C': 3, 'E': 2}
+}
+heuristics = {
+    'A': 7, 'B': 6, 'C': 2, 'D': 6, 'E': 3, 'F': 0
+}
+
+# Example usage
+start, goal = 'A', 'F'
+print("Greedy Best-First Search Path:", search(graph, start, goal, heuristics))
+print("A* Search Path:", search(graph, start, goal, heuristics, a_star=True))
