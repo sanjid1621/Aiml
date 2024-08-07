@@ -1,0 +1,49 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+def kernel(point, xmat, k):
+    m, n = np.shape(xmat)
+    weights = np.mat(np.eye((m)))
+    for j in range(m):
+        diff = point - xmat[j]
+        weights[j, j] = np.exp(diff * diff.T / (-2.0 * k ** 2))
+    return weights
+
+def local_weight(point, xmat, ymat, k):
+    wei = kernel(point, xmat, k)
+    W = (xmat.T * (wei * xmat)).I * (xmat.T * (wei * ymat.T))
+    return W
+
+def local_weight_regression(xmat, ymat, k):
+    m, n = np.shape(xmat)
+    ypred = np.zeros(m)
+    for i in range(m):
+        ypred[i] = xmat[i] * local_weight(xmat[i], xmat, ymat, k)
+    return ypred
+
+def plot_lwr(x, y, ypred):
+    sortindex = x[:, 1].argsort(0)
+    xsort = x[sortindex][:, 0]
+    plt.scatter(x[:, 1].flatten().A[0], y.flatten().A[0], color='blue')
+    plt.plot(xsort[:, 1], ypred[sortindex], color='red', linewidth=2)
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.show()
+
+# Example usage
+# Create sample data
+x = np.array([1, 2, 3, 4, 5])
+y = np.array([1, 2, 1.3, 3.75, 2.25])
+
+# Prepare the data
+xmat = np.mat(np.c_[np.ones(len(x)), x])
+ymat = np.mat(y)
+
+# Set the kernel bandwidth parameter
+k = 0.5
+
+# Perform Locally Weighted Regression
+ypred = local_weight_regression(xmat, ymat, k)
+
+# Plot the results
+plot_lwr(xmat, ymat, ypred)
